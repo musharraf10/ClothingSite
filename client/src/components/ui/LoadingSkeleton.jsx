@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export function LoadingSkeleton({ className = "" }) {
   return (
     <div
-      className={`skeleton-shimmer rounded-xl bg-[#262626] ${className}`}
+      className={`skeleton-shimmer rounded-xl bg-card ${className}`}
       aria-hidden
     />
   );
@@ -14,7 +14,7 @@ export function ProductCardSkeleton() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="rounded-xl overflow-hidden bg-card border border-[#262626] h-full flex flex-col"
+      className="rounded-2xl overflow-hidden bg-card border border-border h-full flex flex-col"
     >
       <LoadingSkeleton className="aspect-[4/5] w-full" />
       <div className="p-4 space-y-3">
@@ -47,7 +47,7 @@ export function ProductListSkeleton({ count = 6 }) {
           key={i}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative flex gap-4 rounded-xl border border-[#262626] bg-card p-3"
+          className="relative flex gap-4 rounded-2xl border border-border bg-card p-3"
         >
           <LoadingSkeleton className="h-28 w-24 shrink-0 rounded-lg sm:w-28" />
           <div className="min-w-0 flex-1 space-y-2 pr-8">

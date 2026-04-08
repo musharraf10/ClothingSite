@@ -6,6 +6,7 @@ import api from "../../api/client.js";
 import { addToCart } from "../../store/slices/cartSlice.js";
 import { useToast } from "../ui/ToastProvider.jsx";
 import { cloudinaryTransform } from "../../utils/cloudinary.js";
+import { ProgressiveImage } from "../ui/ProgressiveImage.jsx";
 
 function uniq(arr) {
   return Array.from(new Set(arr));
@@ -140,7 +141,10 @@ export function ProductCard({ product, onOpen }) {
   const isOos = (size) => variants.find((v) => v.size === size)?.stock === 0;
 
   return (
-    <article
+    <motion.article
+      whileHover={{ y: -6 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 320, damping: 28 }}
       className="flex flex-col cursor-pointer bg-transparent border-none p-0 w-full"
       onMouseEnter={() => {
         setIsHovered(true);
@@ -155,24 +159,28 @@ export function ProductCard({ product, onOpen }) {
       tabIndex={onOpen ? 0 : undefined}
     >
       <div
-        className="relative w-full aspect-[3/4] overflow-hidden rounded-[8px] bg-black dark:bg-zinc-950 flex-shrink-0"
+        className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl bg-black dark:bg-zinc-950 flex-shrink-0 shadow-[0_14px_28px_rgba(0,0,0,0.18)]"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         <AnimatePresence mode="sync">
-          <motion.img
+          <motion.div
             key={imgIndex}
-            src={isValidSrc ? currentSrc : undefined}
-            alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover block"
-            loading="lazy"
-            decoding="async"
-            draggable={false}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-          />
+            className="absolute inset-0"
+          >
+            <motion.div animate={{ scale: isHovered ? 1.05 : 1 }} transition={{ duration: 0.45, ease: "easeOut" }} className="h-full w-full">
+              <ProgressiveImage
+                src={isValidSrc ? currentSrc : undefined}
+                alt={product.name}
+                className="w-full h-full object-cover block will-change-transform transition-transform duration-500"
+                draggable={false}
+              />
+            </motion.div>
+          </motion.div>
         </AnimatePresence>
 
         {(product.isNewArrival || product.isNewCollection || isUpcoming) && (
@@ -360,7 +368,7 @@ export function ProductCard({ product, onOpen }) {
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }
 

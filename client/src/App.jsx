@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Routes,
   Route,
@@ -59,6 +59,7 @@ import { ToastProvider, useToast } from "./components/ui/ToastProvider.jsx";
 import { DesktopBlockScreen } from "./components/layout/DesktopBlockScreen.jsx";
 import { GlobalLoader } from "./components/ui/GlobalLoader.jsx";
 import { activateWaitingServiceWorker } from "./pwa/register-sw.js";
+import { PageTransition } from "./components/motion/PageTransition.jsx";
 
 function AppShell() {
   const dispatch = useDispatch();
@@ -74,7 +75,7 @@ function AppShell() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setShowGlobalLoader(false);
-    }, 500);
+    }, 950);
 
     return () => window.clearTimeout(timer);
   }, []);
@@ -116,37 +117,37 @@ function AppShell() {
     };
   }, [notify]);
 
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault();
-      setInstallPromptEvent(event);
-    };
+  // useEffect(() => {
+  //   const handleBeforeInstallPrompt = (event) => {
+  //     event.preventDefault();
+  //     setInstallPromptEvent(event);
+  //   };
 
-    const handleAppInstalled = () => {
-      setInstallOutcome("accepted");
-      setInstallPromptEvent(null);
-      notify("App installed successfully.", "success");
-    };
+  //   const handleAppInstalled = () => {
+  //     setInstallOutcome("accepted");
+  //     setInstallPromptEvent(null);
+  //     notify("App installed successfully.", "success");
+  //   };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
+  //   window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  //   window.addEventListener("appinstalled", handleAppInstalled);
 
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", handleAppInstalled);
-    };
-  }, [notify]);
+  //   return () => {
+  //     window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  //     window.removeEventListener("appinstalled", handleAppInstalled);
+  //   };
+  // }, [notify]);
 
 
-  useEffect(() => {
-    if (!installOutcome) return undefined;
+  // useEffect(() => {
+  //   if (!installOutcome) return undefined;
 
-    const timer = window.setTimeout(() => {
-      setInstallOutcome(null);
-    }, 3000);
+  //   const timer = window.setTimeout(() => {
+  //     setInstallOutcome(null);
+  //   }, 3000);
 
-    return () => window.clearTimeout(timer);
-  }, [installOutcome]);
+  //   return () => window.clearTimeout(timer);
+  // }, [installOutcome]);
   const handleInstallClick = async () => {
     if (!installPromptEvent) return;
 
@@ -174,13 +175,7 @@ function AppShell() {
       <GlobalLoader show={showGlobalLoader} />
       <Layout>
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
+          <PageTransition transitionKey={location.pathname}>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
@@ -240,7 +235,7 @@ function AppShell() {
               {/* Optional: 404 fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </motion.div>
+          </PageTransition>
         </AnimatePresence>
         {installPromptEvent ? (
           <div className="fixed inset-x-3 bottom-20 z-[70] rounded-2xl border border-border bg-card/95 p-3 shadow-card backdrop-blur">

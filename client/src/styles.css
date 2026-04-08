@@ -85,9 +85,26 @@ body {
   .skeleton-shimmer {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(90deg, #202020 0%, #2c2c2c 50%, #202020 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(var(--c-border), 0.35) 0%,
+      rgba(var(--c-border), 0.65) 50%,
+      rgba(var(--c-border), 0.35) 100%
+    );
     background-size: 240% 100%;
     animation: skeleton-shimmer 1.2s linear infinite;
+  }
+
+  .premium-interactive {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      opacity 220ms ease;
+    will-change: transform;
+  }
+
+  .premium-interactive:hover {
+    transform: translateY(-4px);
   }
 }
 

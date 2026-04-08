@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/client.js";
 import { ProductGrid } from "../components/ui/ProductGrid.jsx";
 import { ProductGridSkeleton } from "../components/ui/LoadingSkeleton.jsx";
 import { ProductCard } from "../components/products/ProductCard.jsx";
 import { ProductListItem } from "../components/products/ProductListItem.jsx";
 import { SectionHeader } from "../components/ui/SectionHeader.jsx";
 import { GridListToggle } from "../components/ui/GridListToggle.jsx";
+import { HangingAnnouncements } from "../components/layout/HangingAnnouncements.jsx";
 import Categories from "../pages/CategoryPage.jsx";
 import { expandProductsByVariant } from "../utils/productVariants.js";
 import { SeoMeta } from "../components/seo/SeoMeta.jsx";
 import { ProductStack3D } from "../components/ProductStack3D.jsx";
+import { AnimatedSection } from "../components/motion/AnimatedSection.jsx";
 import {
   STALE_TIME_SECONDS,
   useGetCategoriesQuery,
@@ -26,7 +27,6 @@ export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [catalogPage, setCatalogPage] = useState(1);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem("product_view_mode") || "grid");
-  const [announcements, setAnnouncements] = useState([]);
 
   const queryOptions = useMemo(() => ({ refetchOnMountOrArgChange: STALE_TIME_SECONDS }), []);
 
@@ -43,20 +43,6 @@ export function HomePage() {
   useEffect(() => {
     localStorage.setItem("product_view_mode", viewMode);
   }, [viewMode]);
-
-  useEffect(() => {
-    let mounted = true;
-    api.get("/announcements")
-      .then(({ data }) => {
-        if (mounted) setAnnouncements(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        if (mounted) setAnnouncements([]);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const heroProductsSource = allProductsQuery.data?.items || [];
   const newDrops = (newDropsQuery.data?.items || []).filter((p) => !p.isUpcoming);
@@ -83,7 +69,7 @@ export function HomePage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="space-y-12">
       <SeoMeta title="MADVIRA | Luxury Minimal Fashion" description="Discover MADVIRA premium essentials and upcoming drops." canonicalUrl="/" />
 
-      <section className="py-2 md:py-6">
+      <AnimatedSection direction="up" className="py-2 md:py-6">
         <ProductStack3D
           images={heroProducts.map((product) => product?.images?.[0]).filter(Boolean)}
           captions={heroProducts.map((product) => product?.name || "")}
@@ -92,11 +78,11 @@ export function HomePage() {
             if (target?.slug) navigate(`/product/${target.slug}`);
           }}
         />
-      </section>
+      </AnimatedSection>
 
       <Categories categories={categories} withSeo={false} />
 
-      <section>
+      <AnimatedSection direction="up">
         <SectionHeader title="New Collection" subtitle="Fresh styles for the premium wardrobe" />
         {loading ? <ProductGridSkeleton count={10} /> : (
           <ProductGrid className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -105,30 +91,9 @@ export function HomePage() {
             ))}
           </ProductGrid>
         )}
-      </section>
+      </AnimatedSection>
 
-      <section className="rounded-2xl border border-border bg-card p-4 md:p-6 overflow-hidden">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base md:text-lg font-semibold text-fg">Announcement</h3>
-          <span className="text-xs text-muted uppercase tracking-[0.2em]">Madvira Notice</span>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {(announcements.length ? announcements : [{ text: "Free shipping on orders above ₹2000" }, { text: "Premium drop every Friday at 7 PM" }, { text: "Luxury essentials, minimal design" }])
-            .slice(0, 3)
-            .map((item, idx) => (
-              <motion.article
-                key={`${item.text}-${idx}`}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.08, duration: 0.35 }}
-                className="rounded-xl border border-border bg-primary p-4"
-              >
-                <p className="text-sm text-fg">{item.text}</p>
-              </motion.article>
-            ))}
-        </div>
-      </section>
+      <HangingAnnouncements />
 
       <section className="space-y-4">
         <SectionHeader title="Reviews" subtitle="Slow moving customer stories" />
