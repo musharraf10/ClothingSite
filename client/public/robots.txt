@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://noorfit.netlify.app/sitemap-v2.xml

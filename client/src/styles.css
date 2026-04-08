@@ -1,0 +1,199 @@
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,700,900&f[]=inter@400,500,600,700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="dark"] {
+  --c-primary: 10 10 10;
+  --c-card: 17 17 17;
+  --c-muted: 163 163 170;
+  --c-border: 39 39 42;
+  --c-accent: 255 255 255;
+  --c-fg: 245 245 245;
+}
+
+[data-theme="light"] {
+  --c-primary: 248 248 248;
+  --c-card: 255 255 255;
+  --c-muted: 107 114 128;
+  --c-border: 220 220 220;
+  --c-accent: 0 0 0;
+  --c-fg: 17 17 17;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    @apply font-sans text-sm bg-primary antialiased;
+    color: rgb(var(--c-fg));
+    background-color: rgb(var(--c-primary));
+    max-width: 100%;
+    overflow-x: hidden;
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-medium;
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* Focus ring for accessibility */
+@layer utilities {
+  /* Hide scrollbar visuals globally (scroll still works). */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge legacy */
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary;
+  }
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .madvira-motion {
+    transition: transform 240ms ease, opacity 240ms ease, box-shadow 240ms ease;
+  }
+  .madvira-hover {
+    transform: translateY(0);
+  }
+  .madvira-hover:hover {
+    transform: translateY(-3px);
+  }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #202020 0%, #2c2c2c 50%, #202020 100%);
+    background-size: 240% 100%;
+    animation: skeleton-shimmer 1.2s linear infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 140% 0;
+  }
+
+  100% {
+    background-position: -140% 0;
+  }
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+.carousel-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Hide scrollbar by pushing it out */
+  padding-bottom: 20px;
+  margin-bottom: -20px;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optional hide */
+.carousel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.announcement-bar {
+  background-color: rgb(var(--c-card));
+  color: rgb(var(--c-fg));
+  height: 36px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  border-bottom: 1px solid rgb(var(--c-border));
+}
+
+.announcement-track {
+  display: inline-flex;
+  gap: 48px;
+  animation: announcement-marquee 25s linear infinite;
+  will-change: transform;
+}
+
+.announcement-text {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Global compatibility layer for legacy hardcoded dark classes in light mode */
+[data-theme="light"] [class*="text-white"] {
+  color: rgb(var(--c-fg)) !important;
+}
+
+[data-theme="light"] [class*="text-zinc-"],
+[data-theme="light"] [class*="text-gray-"],
+[data-theme="light"] [class*="text-slate-"],
+[data-theme="light"] [class*="text-neutral-"] {
+  color: rgb(var(--c-muted)) !important;
+}
+
+[data-theme="light"] [class*="text-zinc-9"],
+[data-theme="light"] [class*="text-zinc-8"],
+[data-theme="light"] [class*="text-gray-9"],
+[data-theme="light"] [class*="text-gray-8"],
+[data-theme="light"] [class*="text-slate-9"],
+[data-theme="light"] [class*="text-slate-8"],
+[data-theme="light"] [class*="text-neutral-9"],
+[data-theme="light"] [class*="text-neutral-8"] {
+  color: rgb(var(--c-fg)) !important;
+}
+
+[data-theme="light"] [class*="bg-[#"],
+[data-theme="light"] [class*="bg-zinc-9"],
+[data-theme="light"] [class*="bg-zinc-8"],
+[data-theme="light"] [class*="bg-gray-9"],
+[data-theme="light"] [class*="bg-gray-8"],
+[data-theme="light"] [class*="bg-slate-9"],
+[data-theme="light"] [class*="bg-slate-8"],
+[data-theme="light"] [class*="bg-neutral-9"],
+[data-theme="light"] [class*="bg-neutral-8"] {
+  background-color: rgb(var(--c-card)) !important;
+}
+
+[data-theme="light"] [class*="border-[#"],
+[data-theme="light"] [class*="border-zinc-"],
+[data-theme="light"] [class*="border-gray-"],
+[data-theme="light"] [class*="border-slate-"],
+[data-theme="light"] [class*="border-neutral-"] {
+  border-color: rgb(var(--c-border)) !important;
+}
+
+@keyframes announcement-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

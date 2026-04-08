@@ -1,0 +1,176 @@
+import jwt from "jsonwebtoken";
+import { Review } from "../models/review.model.js";
+import { Product } from "../models/product.model.js";
+import { Order } from "../models/order.model.js";
+import { User } from "../models/user.model.js";
+import { uploadImageBufferToCloudinary } from "../utils/cloudinaryUpload.util.js";
+
+async function recalculateProductRatings(productId) {
+  const visibleReviews = await Review.find({ product: productId, isHidden: false });
+  const product = await Product.findById(productId);
+  if (!product) return;
+
+  if (!visibleReviews.length) {
+    product.averageRating = 0;
+    product.numReviews = 0;
+    await product.save();
+    return;
+  }
+
+  const avg = visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length;
+  product.averageRating = avg;
+  product.numReviews = visibleReviews.length;
+  await product.save();
+}
+
+async function resolveRequestUser(req) {
+  if (req.user?._id) return req.user;
+
+  let token;
+  if (req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return await User.findById(decoded.id).select("-password");
+  } catch {
+    return null;
+  }
+}
+
+async function hasDeliveredPurchase(productId, userId) {
+  if (!userId) return false;
+
+  return Boolean(
+    await Order.exists({
+      user: userId,
+      status: "delivered",
+      items: { $elemMatch: { product: productId } },
+    }),
+  );
+}
+
+async function checkCanReview(productId, userId) {
+  return hasDeliveredPurchase(productId, userId);
+}
+
+export async function listProductReviews(req, res) {
+  const [reviews, user] = await Promise.all([
+    Review.find({
+      product: req.params.productId,
+      isHidden: false,
+    })
+      .populate("user", "name")
+      .sort({ createdAt: -1 })
+      .lean(),
+    resolveRequestUser(req),
+  ]);
+
+  const canReview = await checkCanReview(req.params.productId, user?._id);
+
+  res.json({
+    reviews,
+    canReview,
+  });
+}
+
+export async function listHomeReviews(req, res) {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 40);
+  const reviews = await Review.find({ isHidden: false })
+    .populate("user", "name")
+    .populate("product", "name slug images")
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+
+  const normalized = reviews
+    .filter((review) => review?.product?._id)
+    .map((review) => ({
+      _id: review._id,
+      rating: review.rating,
+      comment: review.comment || "",
+      images: review.images || [],
+      createdAt: review.createdAt,
+      user: review.user || { name: "Customer" },
+      product: {
+        _id: review.product._id,
+        name: review.product.name,
+        slug: review.product.slug,
+        image: review.product.images?.[0] || "",
+      },
+    }));
+
+  res.json({ reviews: normalized });
+}
+
+export async function createReview(req, res) {
+  const { rating, comment } = req.body;
+  const productId = req.params.productId;
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  const hasDeliveredOrder = await hasDeliveredPurchase(product._id, req.user._id);
+
+  if (!hasDeliveredOrder) {
+    res.status(403);
+    throw new Error("You can only review products you received (delivered)");
+  }
+
+  const existingReview = await Review.findOne({
+    user: req.user._id,
+    product: productId,
+  }).select("_id");
+
+  if (existingReview) {
+    res.status(400);
+    throw new Error("You already reviewed this product");
+  }
+
+  let images = [];
+  if (Array.isArray(req.files) && req.files.length) {
+    images = (
+      await Promise.all(
+        req.files.slice(0, 5).map(async (file) => {
+          if (!file?.buffer) return null;
+          const uploaded = await uploadImageBufferToCloudinary({
+            buffer: file.buffer,
+            mimetype: file.mimetype,
+            folder: "reviews",
+          });
+          return uploaded.url;
+        }),
+      )
+    ).filter(Boolean);
+  }
+
+  try {
+    const review = await Review.create({
+      product: productId,
+      user: req.user._id,
+      rating,
+      comment,
+      images,
+      isVerified: hasDeliveredOrder,
+      isVerifiedPurchase: hasDeliveredOrder,
+    });
+
+    await recalculateProductRatings(productId);
+
+    res.status(201).json(review);
+  } catch (err) {
+    if (err && err.code === 11000) {
+      res.status(409);
+      throw new Error("You already reviewed this product");
+    }
+    throw err;
+  }
+}
+
+export { recalculateProductRatings, checkCanReview, hasDeliveredPurchase };
