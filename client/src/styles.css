@@ -15,7 +15,7 @@
 }
 
 [data-theme="light"] {
-  --c-primary: 248 248 248;
+  --c-primary: 255 255 255;
   --c-card: 255 255 255;
   --c-muted: 107 114 128;
   --c-border: 220 220 220;
@@ -73,7 +73,10 @@ body {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
   .madvira-motion {
-    transition: transform 240ms ease, opacity 240ms ease, box-shadow 240ms ease;
+    transition:
+      transform 240ms ease,
+      opacity 240ms ease,
+      box-shadow 240ms ease;
   }
   .madvira-hover {
     transform: translateY(0);
@@ -213,4 +216,9 @@ body {
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* This resets the internal Tailwind variable that is causing the conflict */
+* {
+  --tw-space-y-reverse: none !important;
 }

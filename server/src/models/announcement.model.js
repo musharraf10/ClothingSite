@@ -2,19 +2,21 @@ import mongoose from "mongoose";
 
 const announcementSchema = new mongoose.Schema(
   {
-    text: { type: String, required: true, trim: true },
-    active: { type: Boolean, default: true },
+    title: { type: String, required: true, trim: true },
+    short: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    text: { type: String, trim: true },
     type: {
       type: String,
-      enum: ["coupon", "offer", "general"],
-      default: "general",
+      enum: ["offer", "announcement", "coupon", "general"],
+      default: "announcement",
     },
+    active: { type: Boolean, default: true },
+    name: { type: String, trim: true },
+    subtitle: { type: String, trim: true },
+    category: { type: String, trim: true },
   },
   { timestamps: true },
 );
 
-export const Announcement = mongoose.model(
-  "Announcement",
-  announcementSchema,
-);
-
+export const Announcement = mongoose.model("Announcement", announcementSchema);

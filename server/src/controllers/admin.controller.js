@@ -789,11 +789,23 @@ export async function adminListAnnouncements(req, res) {
 }
 
 export async function adminCreateAnnouncement(req, res) {
+  const { title, short, description, text, type, active } = req.body;
+
+  // Validate required new fields
+  if (!title || !short || !description) {
+    res.status(400);
+    throw new Error("Title, short, and description are required");
+  }
+
   const payload = {
-    text: req.body.text,
-    type: req.body.type || "general",
-    active: req.body.active ?? true,
+    title: String(title).trim(),
+    short: String(short).trim(),
+    description: String(description).trim(),
+    text: text ? String(text).trim() : "",
+    type: type || "announcement",
+    active: active ?? true,
   };
+
   const announcement = await Announcement.create(payload);
 
   if (announcement.active) {
@@ -802,8 +814,8 @@ export async function adminCreateAnnouncement(req, res) {
       users.map((user) =>
         createNotification({
           userId: user._id,
-          title: "New announcement",
-          message: announcement.text,
+          title: announcement.title,
+          message: announcement.description,
           type: "system",
         }),
       ),
@@ -814,22 +826,45 @@ export async function adminCreateAnnouncement(req, res) {
 }
 
 export async function adminUpdateAnnouncement(req, res) {
-  const payload = {
-    text: req.body.text,
-    type: req.body.type || "general",
-    active: req.body.active,
-  };
+  const { title, short, description, text, type, active } = req.body;
+
+  // Build payload with available fields
+  const payload = {};
+
+  if (title !== undefined) payload.title = String(title).trim();
+  if (short !== undefined) payload.short = String(short).trim();
+  if (description !== undefined)
+    payload.description = String(description).trim();
+  if (text !== undefined) payload.text = String(text).trim();
+  if (type !== undefined) payload.type = type;
+  if (active !== undefined) payload.active = active;
+
+  // Validate that new required fields are not being emptied
+  const existingAnnouncement = await Announcement.findById(req.params.id);
+  if (!existingAnnouncement) {
+    res.status(404);
+    throw new Error("Announcement not found");
+  }
+
+  const finalTitle =
+    payload.title !== undefined ? payload.title : existingAnnouncement.title;
+  const finalShort =
+    payload.short !== undefined ? payload.short : existingAnnouncement.short;
+  const finalDescription =
+    payload.description !== undefined
+      ? payload.description
+      : existingAnnouncement.description;
+
+  if (!finalTitle || !finalShort || !finalDescription) {
+    res.status(400);
+    throw new Error("Title, short, and description cannot be empty");
+  }
 
   const announcement = await Announcement.findByIdAndUpdate(
     req.params.id,
     payload,
     { new: true, runValidators: true },
   );
-
-  if (!announcement) {
-    res.status(404);
-    throw new Error("Announcement not found");
-  }
 
   res.json(announcement);
 }

@@ -3,8 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../../api/client.js";
 
 const initialForm = {
+  title: "",
+  short: "",
+  description: "",
   text: "",
-  type: "general",
+  type: "announcement",
   active: true,
 };
 
@@ -38,6 +41,16 @@ const TYPE_CONFIG = {
     ),
     colors: "bg-amber-500/10 text-amber-400 border-amber-500/25",
     dot: "bg-amber-400",
+  },
+  announcement: {
+    label: "Announcement",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+      </svg>
+    ),
+    colors: "bg-purple-500/10 text-purple-400 border-purple-500/25",
+    dot: "bg-purple-400",
   },
   coupon: {
     label: "Coupon",
@@ -116,8 +129,11 @@ export function AdminAnnouncementsPage() {
   const startEdit = (item) => {
     setEditingId(item._id);
     setForm({
+      title: item.title || "",
+      short: item.short || "",
+      description: item.description || "",
       text: item.text || "",
-      type: item.type || "general",
+      type: item.type || "announcement",
       active: item.active ?? true,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -215,18 +231,63 @@ export function AdminAnnouncementsPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Message textarea */}
+            {/* Title input */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
-                Message
+                Title
+              </label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="e.g., 20% Off Hoodies"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                required
+              />
+            </div>
+
+            {/* Short subtitle input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+                Subtitle (Short)
+              </label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="e.g., This weekend only"
+                value={form.short}
+                onChange={(e) => setForm((f) => ({ ...f, short: e.target.value }))}
+                required
+              />
+            </div>
+
+            {/* Description textarea */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+                Description
               </label>
               <textarea
                 rows={3}
                 className={inputClass + " resize-none"}
-                placeholder="Write your announcement message here…"
+                placeholder="Detailed description of the announcement…"
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                required
+              />
+              <p className="text-[11px] text-zinc-600 text-right">{form.description.length} characters</p>
+            </div>
+
+            {/* Message textarea (legacy) */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+                Message (Legacy)
+              </label>
+              <textarea
+                rows={2}
+                className={inputClass + " resize-none"}
+                placeholder="Legacy message field (optional)…"
                 value={form.text}
                 onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
-                required
               />
               <p className="text-[11px] text-zinc-600 text-right">{form.text.length} characters</p>
             </div>
@@ -360,7 +421,9 @@ export function AdminAnnouncementsPage() {
                           }`}
                       />
                       <div className="min-w-0">
-                        <p className="text-sm text-white leading-relaxed">{a.text}</p>
+                        <p className="text-sm font-semibold text-white leading-relaxed">{a.title || a.text}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{a.short || a.subtitle}</p>
+                        <p className="text-xs text-zinc-600 mt-1 line-clamp-2">{a.description}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <TypeBadge type={a.type} />
                           <StatusPill active={a.active} />

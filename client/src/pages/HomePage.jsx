@@ -124,7 +124,8 @@ export function HomePage() {
       </section>
 
       <section>
-        <SectionHeader title="Collection" subtitle="T-Shirts, Pants, Inners, Jeans and more" />
+        <div className="pt-6 pb-6"> <SectionHeader title="Collection" subtitle="T-Shirts, Pants, Inners, Jeans and more" /></div>
+
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {categories.slice(0, 10).map((category) => (
             <button
@@ -153,7 +154,9 @@ export function HomePage() {
       </section>
 
       <section>
-        <SectionHeader title="Upcoming Collection" subtitle="Only upcoming products" />
+        <div className="pt-6 pb-2">
+          <SectionHeader title="Upcoming Collection" subtitle="Only upcoming products" />
+        </div>
         {loading ? <ProductGridSkeleton count={10} /> : (
           <ProductGrid className="grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {expandedUpcoming.map((product) => (
@@ -164,11 +167,13 @@ export function HomePage() {
       </section>
 
       <section className="space-y-4">
-        <SectionHeader
-          title="All Collection Products"
-          subtitle={catalogTotal > 0 ? `${catalogTotal} product${catalogTotal === 1 ? "" : "s"}` : "Explore everything in MADVIRA"}
-          action={<GridListToggle viewMode={viewMode} onChange={setViewMode} />}
-        />
+        <div className="pt-6 pb-2">
+          <SectionHeader
+            title="All Collection Products"
+            subtitle={catalogTotal > 0 ? `${catalogTotal} product${catalogTotal === 1 ? "" : "s"}` : "Explore everything in MADVIRA"}
+            action={<GridListToggle viewMode={viewMode} onChange={setViewMode} />}
+          />
+        </div>
 
         {backendError && <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">{backendError}</div>}
 
