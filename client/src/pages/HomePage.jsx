@@ -83,7 +83,9 @@ export function HomePage() {
       <Categories categories={categories} withSeo={false} />
 
       <AnimatedSection direction="up">
-        <SectionHeader title="New Collection" subtitle="Fresh styles for the premium wardrobe" />
+        <div className="pt-6">
+          <SectionHeader title="New Collection" subtitle="Fresh styles for the premium wardrobe" />
+        </div>
         {loading ? <ProductGridSkeleton count={10} /> : (
           <ProductGrid className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {expandedNewDrops.map((product) => (

@@ -196,6 +196,7 @@ function AppShell() {
               <Route path="/support" element={<SupportPage />} />
               <Route path="/about" element={<AboutPage />} />
 
+
               {/* Authenticated user routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/order-status/:orderId" element={<OrderStatusPage />} />

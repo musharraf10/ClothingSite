@@ -63,7 +63,7 @@ export function ProductCard({ product, onOpen }) {
     if (images.length <= 1) return;
     intervalRef.current = setInterval(() => {
       setImgIndex((p) => (p + 1) % images.length);
-    }, 900);
+    }, 1500);
   }, [images.length]);
 
   const stopCycle = useCallback(() => {
@@ -115,6 +115,7 @@ export function ProductCard({ product, onOpen }) {
         size: activeVariant?.size || activeSize,
         color: activeVariant?.color || "",
         sku: activeVariant?.sku,
+        isUpcoming,
       }),
     );
 
